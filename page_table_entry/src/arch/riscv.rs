@@ -28,6 +28,9 @@ bitflags::bitflags! {
         /// Indicates the virtual page has been written since the last time the
         /// D bit was cleared.
         const D =   1 << 7;
+
+        const SG2002_KERNEL =  (0x7 << 60);
+        const SG2002_DEVICE =  (1 << 63) | (1 << 60);
     }
 }
 
@@ -91,10 +94,21 @@ impl Rv64PTE {
 }
 
 impl GenericPTE for Rv64PTE {
-    fn new_page(paddr: PhysAddr, flags: MappingFlags, _is_huge: bool) -> Self {
-        let flags = PTEFlags::from(flags) | PTEFlags::A | PTEFlags::D;
-        debug_assert!(flags.intersects(PTEFlags::R | PTEFlags::X));
-        Self(flags.bits() as u64 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+    fn new_page(paddr: PhysAddr, mflags: MappingFlags, _is_huge: bool) -> Self {
+        let flags = PTEFlags::from(mflags) | PTEFlags::A | PTEFlags::D;
+        if mflags.contains(MappingFlags::DEVICE) {
+            // Set special flags for device memory
+            let device_flags = PTEFlags::SG2002_DEVICE | flags;
+            // debug_assert!(flags.intersects(PTEFlags::R | PTEFlags::X));
+            Self(device_flags.bits() as u64 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+        } else if mflags.contains(MappingFlags::USER) {
+            Self(flags.bits() as u64 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+        } else {
+            // Set special flags for kernel memory
+            let kernel_flags = PTEFlags::SG2002_KERNEL | flags;
+            // debug_assert!(flags.intersects(PTEFlags::R | PTEFlags::X));
+            Self(kernel_flags.bits() as u64 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+        }
     }
 
     fn new_table(paddr: PhysAddr) -> Self {
