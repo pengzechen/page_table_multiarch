@@ -74,6 +74,9 @@ impl From<MappingFlags> for PTEFlags {
         if f.contains(MappingFlags::USER) {
             ret |= Self::U;
         }
+        if mflags.contains(MappingFlags::DEVICE) {
+            ret |= Self::SG2002_DEVICE;
+        }
         ret
     }
 }
