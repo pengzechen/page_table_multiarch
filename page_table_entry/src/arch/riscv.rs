@@ -61,7 +61,7 @@ impl From<MappingFlags> for PTEFlags {
         if f.is_empty() {
             return Self::empty();
         }
-        let mut ret = Self::V;
+        let mut ret = Self::V | (7 << 60); // SG2002_KERNEL by default
         if f.contains(MappingFlags::READ) {
             ret |= Self::R;
         }
