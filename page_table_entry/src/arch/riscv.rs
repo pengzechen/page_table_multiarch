@@ -99,7 +99,7 @@ impl Rv64PTE {
 impl GenericPTE for Rv64PTE {
     fn new_page(paddr: PhysAddr, mflags: MappingFlags, _is_huge: bool) -> Self {
         let flags = PTEFlags::from(mflags) | PTEFlags::A | PTEFlags::D;
-        if mflags.contains(MappingFlags::DEVICE) {
+        if mflags.contains(MappingFlags::DEVICE) { 
             // Set special flags for device memory
             let device_flags = PTEFlags::SG2002_DEVICE | flags;
             // debug_assert!(flags.intersects(PTEFlags::R | PTEFlags::X));
