@@ -103,14 +103,14 @@ impl GenericPTE for Rv64PTE {
             // Set special flags for device memory
             let device_flags = PTEFlags::SG2002_DEVICE | flags;
             // debug_assert!(flags.intersects(PTEFlags::R | PTEFlags::X));
-            Self(0 as u64 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+            Self(0 as u64 )
         } else if mflags.contains(MappingFlags::USER) {
-            Self(flags.bits() as u64 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+            Self(flags.bits() as u64 )
         } else {
             // Set special flags for kernel memory
             let kernel_flags = PTEFlags::SG2002_KERNEL | flags;
             // debug_assert!(flags.intersects(PTEFlags::R | PTEFlags::X));
-            Self(0 | ((paddr.as_usize() >> 2) as u64 & Self::PHYS_ADDR_MASK))
+            Self(0 )
         }
     }
 
